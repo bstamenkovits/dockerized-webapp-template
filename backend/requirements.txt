@@ -1,1 +1,6 @@
 fastapi[standard]
+python-dotenv
+pydantic
+sqlalchemy
+greenlet
+aiosqlite

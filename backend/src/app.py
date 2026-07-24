@@ -3,6 +3,10 @@ from pathlib import Path
 from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from core.database import async_session, view_sqlite_schema, get_db
+from fastapi.param_functions import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 app = FastAPI()
 
@@ -24,6 +28,11 @@ async def health():
 @api_router.get("/hello")
 async def hello():
     return {"message": "Hello World"}
+
+
+@api_router.get("/sqlite_schema")
+async def get_sqlite_schema(table_name: str = None, db: AsyncSession = Depends(get_db)):
+    return await view_sqlite_schema(db, table_name)
 
 
 app.include_router(api_router, prefix="/api")

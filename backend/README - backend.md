@@ -26,3 +26,5 @@ fastapi run app.py --reload
 ```
 
 You can now access the API at `http://localhost:8000/docs`
+
+The webpages should also be available, just make sure the frontend has been built (see `README - frontend.md`)

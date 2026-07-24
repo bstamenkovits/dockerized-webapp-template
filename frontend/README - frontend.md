@@ -1,16 +1,40 @@
-# React + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend of the webapp, it is written in TypeScript, and uses React (with Vite and React Router).
 
-Currently, two official plugins are available:
+## Setup
+The frontend is built to the `dist` directory, and then mounted by the backend. You only really need to build the 
+frontend once. 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+For development you can run the frontend either locally or in a Docker container. In either case create a file called `.env` in the root of the repo, and add the following: [todo]
 
-## React Compiler
+### Docker
+[ToDo]
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Local 
+For local development you can install the dependencies locally on your machine.
 
-## Expanding the ESLint configuration
+1) Navigate to the frontend directory
+```aiignore
+cd frontend 
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2) Install dependencies 
+```aiignore
+npm install
+```
+
+3) Build the frontend `dist` directory
+```aiignore
+npm run build
+```
+
+ The webpages should now be available when running the backend (see `README - backend.md`)
+
+> **Alternatively**  
+> For development purposes you can run the local Vite dev server (with HMR)
+> ```aiignore
+> npm run dev
+> ```
+>
+> You can now access the app at `http://localhost:5173`

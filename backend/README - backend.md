@@ -22,9 +22,11 @@ source .venv/bin/activate  # MacOs/Linux
 ```
 3) Run local FastAPI server (using uvicorn in the background)
 ```aiignore
-fastapi run app.py --reload
+fastapi run backend/src/app.py --reload
 ```
 
 You can now access the API at `http://localhost:8000/docs`
 
 The webpages should also be available, just make sure the frontend has been built (see `README - frontend.md`)
+
+The app will expect the SQLite database to be in the root of the repo, if it doesn't exist, an empty .db file will be created.

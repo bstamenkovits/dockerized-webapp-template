@@ -35,7 +35,7 @@
 - [ ] fix `README - frontend.md`: it says "TypeScript", code is plain JavaScript
 
 ## Feature: Testing
-- [ ] add pytest + pytest-asyncio + httpx to backend, write a first test for `/health`
+- [x] add pytest + pytest-asyncio + httpx to backend, write a first test for `/health`
 - [ ] add tests for the auth endpoints (register, login, logout, protected-route 401)
 - [ ] add Vitest + React Testing Library to frontend, write a first test for `HomePage`
 - [ ] add a frontend test for the login flow / session-gated routing

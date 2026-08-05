@@ -37,7 +37,7 @@
 ## Feature: Testing
 - [x] add pytest + pytest-asyncio + httpx to backend, write a first test for `/health`
 - [ ] add tests for the auth endpoints (register, login, logout, protected-route 401)
-- [ ] add Vitest + React Testing Library to frontend, write a first test for `HomePage`
+- [x] add Vitest + React Testing Library to frontend, write a first test for `HomePage`
 - [ ] add a frontend test for the login flow / session-gated routing
 
 ## Feature: Logging & Error Handling

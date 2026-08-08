@@ -37,7 +37,7 @@
 ## Feature: Testing
 - [x] add pytest + pytest-asyncio + httpx to backend, write a first test for `/health`
 - [x] add Vitest + React Testing Library to frontend, write a first test for `HomePage`
-- [ ] add a simple script that runs both pytest and vitest
+- [x] add a simple script that runs both pytest and vitest
 - [ ] run tests during docker image build (make sure test report gets shown when container gets built) [DEPENDS - Feature: Docker & Deployment]
 - [ ] add pytests for the auth endpoints (register, login, logout, protected-route 401) if it does not yet exist [DEPEND - Feature: Auth]
 - [ ] add a frontend test for the login flow / session-gated routing if it does not yet exist [DEPENDS - Feature: Auth]

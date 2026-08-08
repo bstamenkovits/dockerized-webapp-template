@@ -45,8 +45,8 @@
 
 ## Feature: Logging & Error Handling
 - [x] add a `core/logging.py` that configures stdlib `logging` to stdout, called at app startup
-- [ ] add a global FastAPI exception handler so uncaught errors return a consistent JSON shape instead of a raw 500
-- [ ] add request logging middleware (method, path, status, duration)
+- [x] add a global FastAPI exception handler so uncaught errors return a consistent JSON shape instead of a raw 500
+- [x] add request logging middleware (method, path, status, duration)
 - [ ] log auth events (login success/failure, logout) at appropriate levels
 
 ## Feature: Misc / Endpoints

@@ -14,10 +14,11 @@
 - [ ] add `GET /auth/me` returning the current user, for the frontend to bootstrap session state
 
 ## Feature: Database & Migrations
-- [ ] update CLAUDE.md: the `.db` file lives in `database/`, not the repo root
-- [ ] add `.env.example` at the repo root documenting `DB_URL` (pointing at `database/database.db`)
+- [ ] update backend and database folders such that the `.db` file always gets created in `./data/app.db`
+- [ ] update CLAUDE.md: the `.db` file lives in `./data/app.db`
+- [ ] add `.env.example` at the repo root documenting `DB_URL` (pointing at `data/database.db`)
 - [ ] make `core/config.py` raise a clear error if `DB_URL` is unset, instead of silently defaulting to `""`
-- [ ] document the yoyo commands (apply / rollback) in a README
+- [ ] document the yoyo commands (apply / rollback) in a README inside of `database` dir
 
 ## Feature: Docker & Deployment
 - [ ] write Dockerfile stage: apply yoyo migrations against the SQLite file
@@ -43,9 +44,9 @@
 - [ ] add a frontend test for the login flow / session-gated routing if it does not yet exist [DEPENDS - Feature: Auth]
 
 ## Feature: Logging & Error Handling
-- [ ] add a `core/logging.py` that configures stdlib `logging` to stdout, called at app startup
-- [ ] add a global FastAPI exception handler so uncaught errors return a consistent JSON shape instead of a raw 500
-- [ ] add request logging middleware (method, path, status, duration)
+- [x] add a `core/logging.py` that configures stdlib `logging` to stdout, called at app startup
+- [x] add a global FastAPI exception handler so uncaught errors return a consistent JSON shape instead of a raw 500
+- [x] add request logging middleware (method, path, status, duration)
 - [ ] log auth events (login success/failure, logout) at appropriate levels
 
 ## Feature: Misc / Endpoints

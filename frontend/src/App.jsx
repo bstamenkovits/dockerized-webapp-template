@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 
 import HomePage from './pages/HomePage'
 import SettingsPage from './pages/SettingsPage'
+import LoginPage from './pages/LoginPage'
+
 
 function App() {
   const [session, setSession] = useState({})
@@ -18,7 +20,7 @@ function App() {
         path="/settings"
         element={session ? <SettingsPage /> : <Navigate to="/login" replace state={{ from: location }} />}
       />
-      {/*<Route path="/login" element={<LoginPage />} />*/}
+      <Route path="/login" element={<LoginPage />} />
     </Routes>
   )
 }

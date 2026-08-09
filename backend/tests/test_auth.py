@@ -276,6 +276,18 @@ async def test_get_current_user_expired_session(session_maker, auth_client):
     assert exc_info.value.status_code == 401
 
 
+async def test_hello_with_valid_session(auth_client):
+    """
+    Test that /hello succeeds with a valid session cookie.
+    """
+    session_id = await _register_and_login(auth_client, "heidi@example.com")
+    auth_client.cookies.set("session_id", session_id)
+
+    response = await auth_client.get("/api/hello")
+
+    assert response.status_code == 200
+
+
 async def test_login_unknown_email(auth_client):
     """
     Test that you cannot log in with an unknown email/account.

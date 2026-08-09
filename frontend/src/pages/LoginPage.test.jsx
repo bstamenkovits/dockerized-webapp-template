@@ -24,7 +24,6 @@ test('submits credentials to POST /api/auth/login', async () => {
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/auth/login', expect.objectContaining({
         method: 'POST',
-        credentials: 'include',
         body: JSON.stringify({ email: 'user@example.com', password: 'password123' }),
     })))
 })

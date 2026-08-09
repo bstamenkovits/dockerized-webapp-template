@@ -28,8 +28,8 @@
 - [ ] document `docker build` / `docker run` (incl. mounting a volume over `database/` so `database.db` persists outside the container, and passing `.env`) in the root README
 
 ## Feature: Frontend App Shell
-- [ ] create `LoginPage.jsx` with an email+password form calling `POST /api/auth/login`
-- [ ] add a small API client helper (e.g. `src/lib/api.js`) wrapping `fetch` with `credentials: 'include'`
+- [x] create `LoginPage.jsx` with an email+password form calling `POST /api/auth/login`
+- [x] add a small API client helper (e.g. `src/lib/api.js`) wrapping `fetch` with `credentials: 'include'`
 - [ ] wire up the `/login` route in `App.jsx` (currently commented out)
 - [ ] replace the placeholder `session` state with a real `GET /api/auth/me` check on app load
 - [ ] add a logout button/action (e.g. in `Nav.jsx`) calling `POST /api/auth/logout`

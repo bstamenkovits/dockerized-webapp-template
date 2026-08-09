@@ -14,8 +14,8 @@
 - [x] add `GET /auth/me` returning the current user, for the frontend to bootstrap session state
 
 ## Feature: Database & Migrations
-- [ ] update backend and database folders such that the `.db` file always gets created in `./data/app.db`
-- [ ] update CLAUDE.md: the `.db` file lives in `./data/app.db`
+- [x] update backend and database folders such that the `.db` file always gets created in `./data/app.db`
+- [x] update CLAUDE.md: the `.db` file lives in `./data/app.db`
 - [ ] add `.env.example` at the repo root documenting `DB_URL` (pointing at `data/database.db`)
 - [ ] make `core/config.py` raise a clear error if `DB_URL` is unset, instead of silently defaulting to `""`
 - [ ] document the yoyo commands (apply / rollback) in a README inside of `database` dir
@@ -48,7 +48,7 @@
 - [x] add a `core/logging.py` that configures stdlib `logging` to stdout, called at app startup
 - [x] add a global FastAPI exception handler so uncaught errors return a consistent JSON shape instead of a raw 500
 - [x] add request logging middleware (method, path, status, duration)
-- [ ] log auth events (login success/failure, logout) at appropriate levels
+- [x] log auth events (login success/failure, logout) at appropriate levels
 
 ## Feature: Misc / Endpoints
 - [ ] add `GET /status`: like `/health`, but also confirms DB connectivity

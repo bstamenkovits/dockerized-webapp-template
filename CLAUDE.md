@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 ## What this Repo is
-This is a repo for deploying a webapp using a single docker container. It contains the frontend, backend, and database. I want anybody to use this template to quickly create a webapp. The docker container should be able to be run on any machine, user's home PC, a server, a VPS, etc. The database will be a .db SQLite file that gets generated at the root of the repo (see relevant README files).
+This is a repo for deploying a webapp using a single docker container. It contains the frontend, backend, and database. I want anybody to use this template to quickly create a webapp. The docker container should be able to be run on any machine, user's home PC, a server, a VPS, etc. The database will be a .db SQLite file that gets generated in the following location: `data/app.db` directory (see relevant README files).
 
 I want to keep it simple, and clean. Nothing complex or overboard. I want the bare minimum for it to work.
 

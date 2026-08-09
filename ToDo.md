@@ -30,7 +30,7 @@
 ## Feature: Frontend App Shell
 - [x] create `LoginPage.jsx` with an email+password form calling `POST /api/auth/login`
 - [x] add a small API client helper (e.g. `src/lib/api.js`) wrapping `fetch` with `credentials: 'include'`
-- [ ] wire up the `/login` route in `App.jsx` (currently commented out)
+- [x] wire up the `/login` route in `App.jsx` (currently commented out)
 - [ ] replace the placeholder `session` state with a real `GET /api/auth/me` check on app load
 - [ ] add a logout button/action (e.g. in `Nav.jsx`) calling `POST /api/auth/logout`
 - [ ] fix `README - frontend.md`: it says "TypeScript", code is plain JavaScript

@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import apiFetch from '../lib/api'
 
-function LoginPage() {
+function LoginPage({ onLoginSuccess = () => {} }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
+    const navigate = useNavigate()
+    const location = useLocation()
 
     async function handleSubmit(event) {
         event.preventDefault()
@@ -17,7 +20,13 @@ function LoginPage() {
 
         if (!response.ok) {
             setError('Invalid email or password.')
+            return
         }
+
+        // in App.jsx this function is assigned to a refresh of session state
+        await onLoginSuccess()
+        // navigate to page user was trying to access before login redirect
+        navigate(location.state?.from?.pathname ?? '/', { replace: true })
     }
 
     return (

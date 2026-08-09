@@ -1,3 +1,3 @@
-from schemas.auth import UserCreate, LoginRequest, UserOut, SessionOut
+from schemas.auth import RegisterRequest
 
-__all__ = ["UserCreate", "LoginRequest", "UserOut", "SessionOut"]
+__all__ = ["RegisterRequest"]

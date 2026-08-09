@@ -20,7 +20,7 @@ class AuthUser(Base):
 class AuthSession(Base):
     __tablename__ = "auth_sessions"
 
-    id: Mapped[str] = mapped_column(primary_key=True)
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(ForeignKey("auth_users.id"))
     created_at: Mapped[str]
     expires_at: Mapped[str]

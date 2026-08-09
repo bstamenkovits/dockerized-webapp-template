@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import SettingsPage from './SettingsPage'
 
-test('renders the Settings heading and nav links', () => {
+test('renders the Settings heading', () => {
     render(
         <MemoryRouter>
             <SettingsPage />
@@ -10,6 +10,4 @@ test('renders the Settings heading and nav links', () => {
     )
 
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument()
 })

@@ -185,6 +185,21 @@ async def test_login_wrong_password(auth_client):
     assert response.cookies.get("session_id") is None
 
 
+async def test_login_unknown_email(auth_client):
+    """
+    Test that you cannot log in with an unknown email/account.
+    """
+    response = await auth_client.post(
+        "/api/auth/login",
+        json={"email": "nobody@example.com", "password": "s3cret-pass"},
+    )
+
+    # test if correct error code is returned
+    assert response.status_code == 401
+    # test that no session cookie was set
+    assert response.cookies.get("session_id") is None
+
+
 async def _register_and_login(auth_client, email: str) -> str:
     """
     Test helper: register + log in a user, returning their session_id.
@@ -288,16 +303,43 @@ async def test_hello_with_valid_session(auth_client):
     assert response.status_code == 200
 
 
-async def test_login_unknown_email(auth_client):
+async def test_logout_success(session_maker, auth_client):
     """
-    Test that you cannot log in with an unknown email/account.
+    Test that logout revokes the session and clears the cookie.
     """
-    response = await auth_client.post(
-        "/api/auth/login",
-        json={"email": "nobody@example.com", "password": "s3cret-pass"},
-    )
+    session_id = await _register_and_login(auth_client, "ivan@example.com")
+    auth_client.cookies.set("session_id", session_id)
 
-    # test if correct error code is returned
-    assert response.status_code == 401
-    # test that no session cookie was set
+    response = await auth_client.post("/api/auth/logout")
+
+    assert response.status_code == 200
     assert response.cookies.get("session_id") is None
+
+    async with session_maker() as db:
+        result = await db.execute(select(AuthSession).where(AuthSession.id == session_id))
+        session = result.scalar_one()
+
+    assert session.revoked_at is not None
+
+
+async def test_logout_no_session(auth_client):
+    """
+    Test that logout without a session cookie raises 401.
+    """
+    response = await auth_client.post("/api/auth/logout")
+
+    assert response.status_code == 401
+
+
+async def test_route_rejected_after_logout(auth_client):
+    """
+    Test that the old session cookie is rejected by protected routes after logout.
+    """
+    session_id = await _register_and_login(auth_client, "judy@example.com")
+    auth_client.cookies.set("session_id", session_id)
+
+    await auth_client.post("/api/auth/logout")
+
+    response = await auth_client.get("/api/hello")
+
+    assert response.status_code == 401

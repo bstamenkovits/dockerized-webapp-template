@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Cookie
 from schemas.auth import LoginRequest, RegisterRequest
 from models.auth import AuthSession, AuthUser
 from fastapi.param_functions import Depends
@@ -8,7 +8,7 @@ from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from core.database import view_sqlite_schema, get_db
-from core.security import hash_password, verify_password
+from core.security import get_current_user, hash_password, verify_password
 
 
 SESSION_TTL = timedelta(days=7)
@@ -70,6 +70,22 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
         secure=True,
         samesite="lax",
     )
+    return
+
+
+@router.post("/logout")
+async def logout(
+    response: Response,
+    session_id: str | None = Cookie(default=None),
+    user: AuthUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(AuthSession).where(AuthSession.id == session_id))
+    session = result.scalar_one()
+    session.revoked_at = datetime.now().isoformat()
+    await db.commit()
+
+    response.delete_cookie(key="session_id")
     return
 
 

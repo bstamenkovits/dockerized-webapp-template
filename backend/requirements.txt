@@ -4,6 +4,7 @@ pydantic
 sqlalchemy
 greenlet
 aiosqlite
+argon2-cffi
 pytest
 pytest-asyncio
 httpx

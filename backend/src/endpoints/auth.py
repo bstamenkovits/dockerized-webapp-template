@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from logging import getLogger
 
 from fastapi import APIRouter, Cookie
 from schemas.auth import LoginRequest, RegisterRequest, UserOut
@@ -14,6 +15,7 @@ from core.security import get_current_user, hash_password, verify_password
 SESSION_TTL = timedelta(days=7)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+logger = getLogger(__name__)
 
 
 @router.post("/register")
@@ -49,6 +51,7 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
 
     # generic error to avoid revealing whether the email or password was wrong
     if user is None or not verify_password(user.hashed_password, payload.password):
+        logger.warning("Login failed for %s", payload.email)
         raise HTTPException(status_code=401, detail="Invalid email or password.")
 
     # create a session for the authenticated user
@@ -70,6 +73,7 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
         secure=True,
         samesite="lax",
     )
+    logger.info("Login succeeded for user_id=%s", user.id)
     return
 
 
@@ -86,6 +90,7 @@ async def logout(
     await db.commit()
 
     response.delete_cookie(key="session_id")
+    logger.info("Logout succeeded for user_id=%s", user.id)
     return
 
 

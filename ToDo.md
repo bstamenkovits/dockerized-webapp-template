@@ -33,16 +33,16 @@
 - [x] wire up the `/login` route in `App.jsx` (currently commented out)
 - [x] replace the placeholder `session` state with a real `GET /api/auth/me` check on app load
 - [x] add a register page `/register` with component `RegisterPage` that allows user to sign up
-- [ ] add a logout button/action (e.g. in `Nav.jsx`) calling `POST /api/auth/logout`
-- [ ] fix `README - frontend.md`: it says "TypeScript", code is plain JavaScript
+- [x] add a logout button/action (e.g. in `Nav.jsx`) calling `POST /api/auth/logout`
+- [x] fix `README - frontend.md`: it says "TypeScript", code is plain JavaScript
 
 ## Feature: Testing
 - [x] add pytest + pytest-asyncio + httpx to backend, write a first test for `/health`
 - [x] add Vitest + React Testing Library to frontend, write a first test for `HomePage`
 - [x] add a simple script that runs both pytest and vitest
 - [ ] run tests during docker image build (make sure test report gets shown when container gets built) [DEPENDS - Feature: Docker & Deployment]
-- [ ] add pytests for the auth endpoints (register, login, logout, protected-route 401) if it does not yet exist [DEPEND - Feature: Auth]
-- [ ] add a frontend test for the login flow / session-gated routing if it does not yet exist [DEPENDS - Feature: Auth]
+- [x] add pytests for the auth endpoints (register, login, logout, protected-route 401) if it does not yet exist [DEPEND - Feature: Auth]
+- [x] add a frontend test for the login flow / session-gated routing if it does not yet exist [DEPENDS - Feature: Auth]
 
 ## Feature: Logging & Error Handling
 - [x] add a `core/logging.py` that configures stdlib `logging` to stdout, called at app startup

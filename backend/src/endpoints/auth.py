@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Cookie
-from schemas.auth import LoginRequest, RegisterRequest
+from schemas.auth import LoginRequest, RegisterRequest, UserOut
 from models.auth import AuthSession, AuthUser
 from fastapi.param_functions import Depends
 from fastapi import HTTPException, Response
@@ -89,3 +89,9 @@ async def logout(
     return
 
 
+@router.get("/me", response_model=UserOut)
+async def me(user: AuthUser = Depends(get_current_user)):
+    """
+    Get the currently authenticated user's information (used for frontend auth state).
+    """
+    return user

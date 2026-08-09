@@ -185,6 +185,31 @@ async def test_login_wrong_password(auth_client):
     assert response.cookies.get("session_id") is None
 
 
+async def test_me_valid_session(auth_client):
+    """
+    Test that /auth/me returns the current user's data for a valid session.
+    """
+    session_id = await _register_and_login(auth_client, "mallory@example.com")
+    auth_client.cookies.set("session_id", session_id)
+
+    response = await auth_client.get("/api/auth/me")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["email"] == "mallory@example.com"
+    assert body["display_name"] == "mallory@example.com"
+    assert "hashed_password" not in body
+
+
+async def test_me_no_session(auth_client):
+    """
+    Test that /auth/me raises 401 without a session cookie.
+    """
+    response = await auth_client.get("/api/auth/me")
+
+    assert response.status_code == 401
+
+
 async def test_login_unknown_email(auth_client):
     """
     Test that you cannot log in with an unknown email/account.

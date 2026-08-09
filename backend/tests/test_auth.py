@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from app import app
 from core.database import get_db
-from models.auth import AuthUser
+from models.auth import AuthSession, AuthUser
 from models.base import Base
 import models.auth  # noqa: F401  registers auth tables on Base.metadata
 
@@ -98,6 +98,9 @@ async def test_register_success(session_maker, auth_client):
 
 
 async def test_register_duplicate_email(auth_client):
+    """
+    Test that a user cannot register with an already existing email.
+    """
     payload = {
         "display_name": "Bob",
         "email": "bob@example.com",
@@ -112,3 +115,82 @@ async def test_register_duplicate_email(auth_client):
     )
 
     assert second.status_code == 400
+
+
+async def test_login_success(session_maker, auth_client):
+    """
+    Test that a registered user can log in and receives a session_id cookie.
+    """
+    # create a temp test user
+    await auth_client.post(
+        "/api/auth/register",
+        json={
+            "display_name": "Carol",
+            "email": "carol@example.com",
+            "password": "s3cret-pass",
+        },
+    )
+
+    # try to log in
+    response = await auth_client.post(
+        "/api/auth/login",
+        json={"email": "carol@example.com", "password": "s3cret-pass"},
+    )
+
+    # test a valid response is returned
+    assert response.status_code == 200
+
+    # test that a session cookie was set
+    session_id = response.cookies.get("session_id")
+    assert session_id
+
+    # test that the correct session was stored in the database
+    async with session_maker() as session:
+        result = await session.execute(
+            select(AuthSession).where(AuthSession.id == session_id)
+        )
+        auth_session = result.scalar_one()
+        # compare database session id with cookie session id
+        assert auth_session.id == session_id
+
+    # test the session is active (not revoked)
+    assert auth_session.revoked_at is None
+
+
+async def test_login_wrong_password(auth_client):
+    """
+    Test that a an existing user cannot log in with an incorrect password.
+    """
+    await auth_client.post(
+        "/api/auth/register",
+        json={
+            "display_name": "Dave",
+            "email": "dave@example.com",
+            "password": "s3cret-pass",
+        },
+    )
+
+    response = await auth_client.post(
+        "/api/auth/login",
+        json={"email": "dave@example.com", "password": "wrong-pass"},
+    )
+
+    # test if correct error code is returned
+    assert response.status_code == 401
+    # test that no session cookie was set
+    assert response.cookies.get("session_id") is None
+
+
+async def test_login_unknown_email(auth_client):
+    """
+    Test that a you cannot log in with an unknown email.
+    """
+    response = await auth_client.post(
+        "/api/auth/login",
+        json={"email": "nobody@example.com", "password": "s3cret-pass"},
+    )
+
+    # test if correct error code is returned
+    assert response.status_code == 401
+    # test that no session cookie was set
+    assert response.cookies.get("session_id") is None

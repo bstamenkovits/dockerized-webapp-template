@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import HomePage from './pages/HomePage'
 import SettingsPage from './pages/SettingsPage'
 import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 import apiFetch from './lib/api'
 
 
@@ -44,6 +45,7 @@ function App() {
         element={session ? <SettingsPage /> : <Navigate to="/login" replace state={{ from: location }} />}
       />
       <Route path="/login" element={<LoginPage onLoginSuccess={refreshSession} />} />
+      <Route path="/register" element={<RegisterPage />} />
     </Routes>
   )
 }

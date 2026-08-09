@@ -1,38 +1,45 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import apiFetch from '../lib/api'
 
-function LoginPage({ onLoginSuccess = () => {} }) {
+function RegisterPage() {
+    const [displayName, setDisplayName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const navigate = useNavigate()
-    const location = useLocation()
 
     async function handleSubmit(event) {
         event.preventDefault()
         setError('')
 
-        const response = await apiFetch('/auth/login', {
+        const response = await apiFetch('/auth/register', {
             method: 'POST',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ display_name: displayName, email, password }),
         })
 
         if (!response.ok) {
-            setError('Invalid email or password.')
+            setError('Could not create account. Email may already be registered.')
             return
         }
 
-        // in App.jsx this function is assigned to a refresh of session state
-        await onLoginSuccess()
-        // navigate to page user was trying to access before login redirect
-        navigate(location.state?.from?.pathname ?? '/', { replace: true })
+        // registering does not start a session, so send the user to log in
+        navigate('/login', { replace: true })
     }
 
     return (
         <div>
-            <h1>Login</h1>
+            <h1>Register</h1>
             <form onSubmit={handleSubmit}>
+                <label htmlFor="displayName">Display name</label>
+                <input
+                    id="displayName"
+                    type="text"
+                    value={displayName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    required
+                />
+
                 <label htmlFor="email">Email</label>
                 <input
                     id="email"
@@ -51,14 +58,14 @@ function LoginPage({ onLoginSuccess = () => {} }) {
                     required
                 />
 
-                <button type="submit">Log in</button>
+                <button type="submit">Create account</button>
             </form>
             {error && <p role="alert">{error}</p>}
             <p>
-                Don't have an account? <Link to="/register">Register</Link>
+                Already have an account? <Link to="/login">Log in</Link>
             </p>
         </div>
     )
 }
 
-export default LoginPage
+export default RegisterPage

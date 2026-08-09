@@ -2,10 +2,11 @@ from datetime import datetime
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from fastapi import Cookie, Depends, HTTPException
+from fastapi import Cookie, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.config import SESSION_TTL
 from core.database import get_db
 from models.auth import AuthSession, AuthUser
 from logging import getLogger
@@ -29,30 +30,20 @@ def verify_password(hashed_password: str, password: str) -> bool:
         return False
 
 
-async def get_current_user(
-    session_id: str | None = Cookie(default=None),
-    db: AsyncSession = Depends(get_db),
-) -> AuthUser:
+async def resolve_active_session(
+    session_id: str | None,
+    db: AsyncSession,
+) -> AuthSession:
     """
-    Resolve the authenticated user from the session_id cookie or raise 401.
-
-    Uses the session_id in the cookie to look up a session in the database. Raises
-    a 401 code (not authenticated) if
-        - session_id is not provided
-        - session does not exist
-        - session has been revoked (e.g. logged out)
-        - session has expired
-        - user does not exist
+    Look up the session for session_id and raise 401 if it's missing, revoked, or expired.
     """
     if session_id is None:
         logger.warning("No session_id cookie provided")
         raise HTTPException(status_code=401, detail="Not authenticated.")
 
-    # Look up session in database
     result = await db.execute(select(AuthSession).where(AuthSession.id == session_id))
     session = result.scalar_one_or_none()
 
-    # Validate session
     if session is None:
         logger.warning("Session not found")
         raise HTTPException(status_code=401, detail="Not authenticated.")
@@ -65,13 +56,42 @@ async def get_current_user(
         logger.warning("Session expired")
         raise HTTPException(status_code=401, detail="Not authenticated.")
 
-    # Look up user in database
+    return session
+
+
+async def get_current_user(
+    response: Response,
+    session_id: str | None = Cookie(default=None),
+    db: AsyncSession = Depends(get_db),
+) -> AuthUser:
+    """
+    Resolve the authenticated user from the session_id cookie or raise 401.
+
+    On success, slides the session's expiration forward by SESSION_TTL and reissues
+    the cookie, so a user who visits at least once per TTL window stays logged in.
+    """
+    session = await resolve_active_session(session_id, db)
+
     result = await db.execute(select(AuthUser).where(AuthUser.id == session.user_id))
     user = result.scalar_one_or_none()
 
-    # validate user
     if user is None:
         logger.warning("User not found")
         raise HTTPException(status_code=401, detail="Not authenticated.")
+
+    # sliding-window: extend the session and reissue the cookie
+    now = datetime.now()
+    session.expires_at = (now + SESSION_TTL).isoformat()
+    session.user_last_active = now.isoformat()
+    await db.commit()
+
+    response.set_cookie(
+        key="session_id",
+        value=session.id,
+        max_age=int(SESSION_TTL.total_seconds()),
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
 
     return user

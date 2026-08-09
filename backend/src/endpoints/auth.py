@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from logging import getLogger
 
 from fastapi import APIRouter, Cookie
@@ -8,11 +8,10 @@ from fastapi.param_functions import Depends
 from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from core.config import SESSION_TTL
 from core.database import view_sqlite_schema, get_db
-from core.security import get_current_user, hash_password, verify_password
+from core.security import get_current_user, hash_password, resolve_active_session, verify_password
 
-
-SESSION_TTL = timedelta(days=7)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 logger = getLogger(__name__)
@@ -60,6 +59,7 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
         user_id=user.id,
         created_at=now.isoformat(),
         expires_at=(now + SESSION_TTL).isoformat(),
+        user_last_active=now.isoformat(),
     )
     db.add(session)
     await db.commit()
@@ -81,16 +81,14 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
 async def logout(
     response: Response,
     session_id: str | None = Cookie(default=None),
-    user: AuthUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(AuthSession).where(AuthSession.id == session_id))
-    session = result.scalar_one()
+    session = await resolve_active_session(session_id, db)
     session.revoked_at = datetime.now().isoformat()
     await db.commit()
 
     response.delete_cookie(key="session_id")
-    logger.info("Logout succeeded for user_id=%s", user.id)
+    logger.info("Logout succeeded for user_id=%s", session.user_id)
     return
 
 

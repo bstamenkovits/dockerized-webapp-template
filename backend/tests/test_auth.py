@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import pytest
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -247,7 +247,7 @@ async def test_get_current_user_valid_session(session_maker, auth_client):
     session_id = await _register_and_login(auth_client, "eve@example.com")
 
     async with session_maker() as db:
-        user = await get_current_user(session_id=session_id, db=db)
+        user = await get_current_user(response=Response(), session_id=session_id, db=db)
 
     assert user.email == "eve@example.com"
 
@@ -258,7 +258,7 @@ async def test_get_current_user_no_cookie(session_maker):
     """
     async with session_maker() as db:
         with pytest.raises(HTTPException) as exc_info:
-            await get_current_user(session_id=None, db=db)
+            await get_current_user(response=Response(), session_id=None, db=db)
 
     assert exc_info.value.status_code == 401
 
@@ -269,7 +269,7 @@ async def test_get_current_user_unknown_session(session_maker):
     """
     async with session_maker() as db:
         with pytest.raises(HTTPException) as exc_info:
-            await get_current_user(session_id="does-not-exist", db=db)
+            await get_current_user(response=Response(), session_id="does-not-exist", db=db)
 
     assert exc_info.value.status_code == 401
 
@@ -290,7 +290,7 @@ async def test_get_current_user_revoked_session(session_maker, auth_client):
 
     async with session_maker() as db:
         with pytest.raises(HTTPException) as exc_info:
-            await get_current_user(session_id=session_id, db=db)
+            await get_current_user(response=Response(), session_id=session_id, db=db)
 
     assert exc_info.value.status_code == 401
 
@@ -311,9 +311,39 @@ async def test_get_current_user_expired_session(session_maker, auth_client):
 
     async with session_maker() as db:
         with pytest.raises(HTTPException) as exc_info:
-            await get_current_user(session_id=session_id, db=db)
+            await get_current_user(response=Response(), session_id=session_id, db=db)
 
     assert exc_info.value.status_code == 401
+
+
+async def test_get_current_user_extends_session(session_maker, auth_client):
+    """
+    Test that a valid request slides the session's expiration forward, so a session
+    close to expiring survives as long as it's used at least once per TTL window.
+    """
+    session_id = await _register_and_login(auth_client, "judy@example.com")
+
+    async with session_maker() as db:
+        result = await db.execute(select(AuthSession).where(AuthSession.id == session_id))
+        session = result.scalar_one()
+
+        # simulate a session that's about to expire
+        original_expires_at = (datetime.now() + timedelta(minutes=1)).isoformat()
+        session.expires_at = original_expires_at
+        await db.commit()
+
+    response = Response()
+    async with session_maker() as db:
+        await get_current_user(response=response, session_id=session_id, db=db)
+
+    assert response.headers["set-cookie"]
+
+    async with session_maker() as db:
+        result = await db.execute(select(AuthSession).where(AuthSession.id == session_id))
+        session = result.scalar_one()
+
+    assert session.expires_at > original_expires_at
+    assert session.user_last_active is not None
 
 
 async def test_hello_with_valid_session(auth_client):

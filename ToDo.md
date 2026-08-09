@@ -9,7 +9,7 @@
 - [x] wire `auth.router` into `api_router` in `endpoints/__init__.py`
 - [x] add `LoginRequest` schema + `POST /auth/login`: verify email+password, create an `auth_sessions` row, set `session_id` cookie (HttpOnly, Secure, SameSite=Lax, 7-day expiry)
 - [ ] add `POST /auth/logout`: set `revoked_at` on the session, clear the cookie
-- [ ] add a `get_current_user` dependency: reads the `session_id` cookie, checks it's not expired/revoked, returns the user or 401
+- [x] add a `get_current_user` dependency: reads the `session_id` cookie, checks it's not expired/revoked, returns the user or 401
 - [ ] apply `get_current_user` to all routes except `/health` and `/status`
 - [ ] add `GET /auth/me` returning the current user, for the frontend to bootstrap session state
 

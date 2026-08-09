@@ -1,4 +1,7 @@
+from datetime import datetime, timedelta
+
 import pytest
+from fastapi import HTTPException
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -6,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 
 from app import app
 from core.database import get_db
+from core.security import get_current_user
 from models.auth import AuthSession, AuthUser
 from models.base import Base
 import models.auth  # noqa: F401  registers auth tables on Base.metadata
@@ -181,9 +185,100 @@ async def test_login_wrong_password(auth_client):
     assert response.cookies.get("session_id") is None
 
 
+async def _register_and_login(auth_client, email: str) -> str:
+    """
+    Test helper: register + log in a user, returning their session_id.
+    """
+    await auth_client.post(
+        "/api/auth/register",
+        json={"display_name": email, "email": email, "password": "s3cret-pass"},
+    )
+    response = await auth_client.post(
+        "/api/auth/login",
+        json={"email": email, "password": "s3cret-pass"},
+    )
+    return response.cookies.get("session_id")
+
+
+async def test_get_current_user_valid_session(session_maker, auth_client):
+    """
+    Test that a valid session_id resolves to the correct user.
+    """
+    session_id = await _register_and_login(auth_client, "eve@example.com")
+
+    async with session_maker() as db:
+        user = await get_current_user(session_id=session_id, db=db)
+
+    assert user.email == "eve@example.com"
+
+
+async def test_get_current_user_no_cookie(session_maker):
+    """
+    Test that a missing session_id cookie raises 401.
+    """
+    async with session_maker() as db:
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(session_id=None, db=db)
+
+    assert exc_info.value.status_code == 401
+
+
+async def test_get_current_user_unknown_session(session_maker):
+    """
+    Test that an unrecognized session_id raises 401.
+    """
+    async with session_maker() as db:
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(session_id="does-not-exist", db=db)
+
+    assert exc_info.value.status_code == 401
+
+
+async def test_get_current_user_revoked_session(session_maker, auth_client):
+    """
+    Test that a revoked session raises 401.
+    """
+    session_id = await _register_and_login(auth_client, "frank@example.com")
+
+    async with session_maker() as db:
+        result = await db.execute(select(AuthSession).where(AuthSession.id == session_id))
+        session = result.scalar_one()
+
+        # revoke the session manually
+        session.revoked_at = datetime.now().isoformat()
+        await db.commit()
+
+    async with session_maker() as db:
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(session_id=session_id, db=db)
+
+    assert exc_info.value.status_code == 401
+
+
+async def test_get_current_user_expired_session(session_maker, auth_client):
+    """
+    Test that an expired session raises 401.
+    """
+    session_id = await _register_and_login(auth_client, "grace@example.com")
+
+    async with session_maker() as db:
+        result = await db.execute(select(AuthSession).where(AuthSession.id == session_id))
+        session = result.scalar_one()
+
+        # expire the session manually
+        session.expires_at = (datetime.now() - timedelta(days=1)).isoformat()
+        await db.commit()
+
+    async with session_maker() as db:
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(session_id=session_id, db=db)
+
+    assert exc_info.value.status_code == 401
+
+
 async def test_login_unknown_email(auth_client):
     """
-    Test that a you cannot log in with an unknown email.
+    Test that you cannot log in with an unknown email/account.
     """
     response = await auth_client.post(
         "/api/auth/login",

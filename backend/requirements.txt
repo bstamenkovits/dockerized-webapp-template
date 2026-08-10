@@ -1,6 +1,7 @@
 fastapi[standard]
 python-dotenv
 pydantic
+pydantic-settings
 sqlalchemy
 greenlet
 aiosqlite

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from logging import getLogger
 
 from fastapi import APIRouter, Cookie
@@ -8,7 +8,7 @@ from fastapi.param_functions import Depends
 from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from core.config import SESSION_TTL
+from core.config import config
 from core.database import view_sqlite_schema, get_db
 from core.security import get_current_user, hash_password, resolve_active_session, verify_password
 
@@ -44,6 +44,8 @@ async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db))
 
 @router.post("/login")
 async def login(payload: LoginRequest, response: Response, db: AsyncSession = Depends(get_db)):
+    SESSION_TTL = timedelta(days=config.session_ttl_days)
+
     # look up the user by email
     result = await db.execute(select(AuthUser).where(AuthUser.email == payload.email))
     user = result.scalar_one_or_none()

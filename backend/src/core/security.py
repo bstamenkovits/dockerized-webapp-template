@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
@@ -6,7 +6,7 @@ from fastapi import Cookie, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.config import SESSION_TTL
+from core.config import config
 from core.database import get_db
 from models.auth import AuthSession, AuthUser
 from logging import getLogger
@@ -70,6 +70,7 @@ async def get_current_user(
     On success, slides the session's expiration forward by SESSION_TTL and reissues
     the cookie, so a user who visits at least once per TTL window stays logged in.
     """
+    SESSION_TTL = timedelta(days=config.session_ttl_days)
     session = await resolve_active_session(session_id, db)
 
     result = await db.execute(select(AuthUser).where(AuthUser.id == session.user_id))

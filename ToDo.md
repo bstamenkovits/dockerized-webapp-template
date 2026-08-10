@@ -16,8 +16,8 @@
 ## Feature: Database & Migrations
 - [x] update backend and database folders such that the `.db` file always gets created in `./data/app.db`
 - [x] update CLAUDE.md: the `.db` file lives in `./data/app.db`
-- [ ] add `.env.example` at the repo root documenting `DB_URL` (pointing at `data/database.db`)
-- [ ] make `core/config.py` raise a clear error if `DB_URL` is unset, instead of silently defaulting to `""`
+- [x] add `.env.example` at the repo root documenting `DB_URL` (pointing at `data/app.db`)
+- [x] make `core/config.py` raise a clear error if `DB_URL` is unset, instead of silently defaulting to `""`
 - [ ] document the yoyo commands (apply / rollback) in a README inside of `database` dir
 
 ## Feature: Docker & Deployment

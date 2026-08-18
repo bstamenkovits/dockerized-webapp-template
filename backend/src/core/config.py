@@ -1,21 +1,16 @@
 from datetime import timedelta
-from pydantic_settings import BaseSettings
-from logging import getLogger
-from dotenv import load_dotenv
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
-load_dotenv()  # Load environment variables from .env file
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=REPO_ROOT / ".env")
 
-logger = getLogger(__name__)
-
-
-class Config(BaseSettings):
-    db_url: str
-    session_ttl_days: int 
+    db_url: str = ""
+    session_ttl_days: int = 7
 
 
-try:
-    config = Config()
-except Exception as e:
-    logger.error(f"Error occurred while initializing config: \n\n{e}")
-    raise
+settings = Settings()

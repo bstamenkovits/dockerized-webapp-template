@@ -8,7 +8,7 @@ from fastapi.param_functions import Depends
 from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from core.config import config
+from core.config import settings
 from core.database import view_sqlite_schema, get_db
 from core.security import get_current_user, hash_password, resolve_active_session, verify_password
 
@@ -44,7 +44,7 @@ async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db))
 
 @router.post("/login")
 async def login(payload: LoginRequest, response: Response, db: AsyncSession = Depends(get_db)):
-    SESSION_TTL = timedelta(days=config.session_ttl_days)
+    SESSION_TTL = timedelta(days=settings.session_ttl_days)
 
     # look up the user by email
     result = await db.execute(select(AuthUser).where(AuthUser.email == payload.email))

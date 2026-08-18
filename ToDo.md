@@ -18,14 +18,14 @@
 - [x] update CLAUDE.md: the `.db` file lives in `./data/app.db`
 - [x] add `.env.example` at the repo root documenting `DB_URL` (pointing at `data/app.db`)
 - [x] make `core/config.py` raise a clear error if `DB_URL` is unset, instead of silently defaulting to `""`
-- [ ] document the yoyo commands (apply / rollback) in a README inside of `database` dir
+- [x] document the yoyo commands (apply / rollback) in a README inside of `database` dir
 
 ## Feature: Docker & Deployment
-- [ ] write Dockerfile stage: apply yoyo migrations against the SQLite file
-- [ ] write Dockerfile stage: install frontend deps and `npm run build`
-- [ ] write Dockerfile final stage: install backend deps, copy built `frontend/dist` + backend source, expose port, run the app
-- [ ] add a `.dockerignore` (node_modules, .venv, __pycache__, .git, dist)
-- [ ] document `docker build` / `docker run` (incl. mounting a volume over `database/` so `database.db` persists outside the container, and passing `.env`) in the root README
+- [x] write Dockerfile stage: apply yoyo migrations against the SQLite file
+- [x] write Dockerfile stage: install frontend deps and `npm run build`
+- [x] write Dockerfile final stage: install backend deps, copy built `frontend/dist` + backend source, expose port, run the app
+- [x] add a `.dockerignore` (node_modules, .venv, __pycache__, .git, dist)
+- [x] document `docker build` / `docker run` (incl. mounting a volume over `data/` so `database.db` persists outside the container, and passing `.env`) in the root README
 
 ## Feature: Frontend App Shell
 - [x] create `LoginPage.jsx` with an email+password form calling `POST /api/auth/login`
@@ -40,7 +40,6 @@
 - [x] add pytest + pytest-asyncio + httpx to backend, write a first test for `/health`
 - [x] add Vitest + React Testing Library to frontend, write a first test for `HomePage`
 - [x] add a simple script that runs both pytest and vitest
-- [ ] run tests during docker image build (make sure test report gets shown when container gets built) [DEPENDS - Feature: Docker & Deployment]
 - [x] add pytests for the auth endpoints (register, login, logout, protected-route 401) if it does not yet exist [DEPEND - Feature: Auth]
 - [x] add a frontend test for the login flow / session-gated routing if it does not yet exist [DEPENDS - Feature: Auth]
 
